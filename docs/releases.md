@@ -1,8 +1,9 @@
 # Container releases
 
-The image publication workflow is prepared; v0.1.0 images are not available until
-a maintainer publishes that release and the workflow succeeds. Source builds in
-the [README](../README.md) remain available before the first image release.
+Image availability requires a published GitHub Release, a successful Release images
+workflow and Public visibility on both GHCR packages. Confirm all three before
+using the image installation commands. Source builds in the [README](../README.md)
+are available independently of image publication.
 
 ## Install a published version
 

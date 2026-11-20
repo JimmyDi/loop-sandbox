@@ -142,6 +142,17 @@ and real model calls have not been validated. See docs/validation.md for evidenc
 
 Newest first. Include date, status, behavior, files, verification, remaining gaps.
 
+### 2026-11-20: v0.1.0 release preparation (complete; publication pending)
+
+- Finalize the initial version changelog and make installation availability depend
+  on successful release publication. Package and both image defaults already match
+  0.1.0; no dependency/runtime changes are intended.
+- Verification: English content/local links, whitespace and package/image/changelog
+  version consistency passed. Documentation-only changes; runtime tests were not
+  rerun locally. PR CI remains required before merge.
+- Files: CHANGELOG.md, README.md, docs/releases.md and AGENTS.md. Release creation
+  and GHCR visibility remain separate maintainer actions.
+
 ### 2026-11-20: GHCR release images (complete; publication pending)
 
 - Add release-triggered image publication gated by native AMD64/ARM64 checks and

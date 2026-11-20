@@ -1,0 +1,26 @@
+# Changelog
+
+User-visible changes are recorded here. Unreleased entries are not release claims.
+
+## [Unreleased]
+
+### Added
+
+- Public HTTP sandbox lifecycle, files, commands and headless Chromium, plus an
+  optional model tool-calling endpoint.
+- Session-bound Streamable HTTP MCP at /mcp/ with file editing, background commands,
+  polling/cancellation, lazy allocation, reuse and SQLite generation records.
+  Recycled workspaces start empty.
+- Private credential initialization and atomic token rotation with stable client
+  identity and migration from legacy DEMO_API_KEY settings.
+- Explicit local authentication bypass with LOOP_SANDBOX_AUTH_DISABLED=1;
+  normal deployment defaults to token verification.
+- MIT licensing, contributor/security policies, dependency updates, sequential
+  integration commands and Python package verification.
+
+### Changed
+
+- Product/distribution names are Loop Sandbox and loop-sandbox; imports use
+  loop_sandbox. Sources separate server, runtime, contracts, worker and adapters.
+  Compose lives in deploy/ and images in docker/. See the
+  [migration guide](docs/architecture/repository.md) for current paths.

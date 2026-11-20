@@ -1,0 +1,45 @@
+name: Check
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.7.6"
+          python-version: "3.12"
+      - run: make install
+      - run: make check
+      - run: make package
+  integration:
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      LOOP_SANDBOX_AUTH_DISABLED: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.7.6"
+          python-version: "3.12"
+      - run: make install
+      - run: make setup
+      - run: docker compose --env-file .env -f deploy/compose.yaml config -q
+      - run: make build
+      - run: make up
+      - run: make integration
+      - if: failure()
+        run: docker compose --env-file .env -f deploy/compose.yaml logs --tail=100
+      - if: always()
+        run: make down

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "semanticCommits": "enabled",
+  "automerge": false,
+  "dependencyDashboard": true,
+  "prConcurrentLimit": 3,
+  "prHourlyLimit": 2,
+  "packageRules": [
+    {"matchUpdateTypes": ["patch", "minor"], "groupName": "non-major dependencies"},
+    {"matchUpdateTypes": ["major"], "dependencyDashboardApproval": true},
+    {"matchManagers": ["github-actions", "dockerfile"], "groupName": null}
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 6am on monday"]
+  }
+}

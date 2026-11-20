@@ -14,6 +14,10 @@ container platforms are not a drop-in deployment target.
 
 ## Quick start
 
+For published images without a source build or host Python, see
+[container installation and releases](docs/releases.md). The first image release
+is pending; the source commands below work before publication.
+
 Run from the project root:
 
 ~~~bash

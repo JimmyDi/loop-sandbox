@@ -65,3 +65,6 @@ make package and dedicated make integration. Validate release images and support
 architectures. Package checks cover license, metadata, CLI and imports outside the
 checkout. Publishing, creating tags and enabling GitHub private vulnerability
 reporting are separate maintainer actions; these commands publish nothing.
+See [container releases](docs/releases.md) for GHCR gates, package visibility and
+image-only installation. Pull-request CI exercises that Compose configuration
+using locally built images and never publishes packages.

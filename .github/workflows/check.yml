@@ -27,6 +27,8 @@ jobs:
     timeout-minutes: 20
     env:
       LOOP_SANDBOX_AUTH_DISABLED: "0"
+      API_IMAGE: loop-sandbox-api:local
+      WORKER_IMAGE: loop-sandbox-worker:local
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
@@ -37,9 +39,10 @@ jobs:
       - run: make setup
       - run: docker compose --env-file .env -f deploy/compose.yaml config -q
       - run: make build
-      - run: make up
+      - run: docker compose --env-file .env -f deploy/compose.images.yaml config -q
+      - run: docker compose --env-file .env -f deploy/compose.images.yaml up -d --wait
       - run: make integration
       - if: failure()
-        run: docker compose --env-file .env -f deploy/compose.yaml logs --tail=100
+        run: docker compose --env-file .env -f deploy/compose.images.yaml logs --tail=100
       - if: always()
-        run: make down
+        run: docker compose --env-file .env -f deploy/compose.images.yaml down

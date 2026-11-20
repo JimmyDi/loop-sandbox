@@ -1,0 +1,121 @@
+name: Release images
+on:
+  release:
+    types: [published]
+permissions:
+  contents: read
+concurrency:
+  group: release-images-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    if: github.repository == 'JimmyDi/loop-sandbox'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      sha: ${{ steps.version.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.7.6"
+          python-version: "3.12"
+      - id: version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          IS_PRERELEASE: ${{ github.event.release.prerelease }}
+        run: |
+          python3 - <<'PY'
+          import os, re, subprocess, tomllib
+          from pathlib import Path
+          version = tomllib.loads(Path("pyproject.toml").read_text())["project"]["version"]
+          assert re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version), "Use a stable semver version"
+          assert os.environ["RELEASE_TAG"] == "v" + version, "Tag must match package version"
+          assert os.environ["IS_PRERELEASE"] == "false", "Prerelease images are not supported"
+          subprocess.run(["git", "merge-base", "--is-ancestor", "HEAD", "origin/main"], check=True)
+          sha = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+          with open(os.environ["GITHUB_OUTPUT"], "a") as stream:
+              stream.write(f"version={version}\nsha={sha}\n")
+          PY
+      - run: make install
+      - run: make check
+      - run: make package
+  native:
+    needs: validate
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: amd64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    env:
+      LOOP_SANDBOX_AUTH_DISABLED: "0"
+      API_IMAGE: loop-sandbox-api:local
+      WORKER_IMAGE: loop-sandbox-worker:local
+      IMAGE_PREFIX: ghcr.io/jimmydi/loop-sandbox
+      CANDIDATE: sha-${{ needs.validate.outputs.sha }}-${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate.outputs.sha }}
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.7.6"
+          python-version: "3.12"
+      - run: make install
+      - run: make setup
+      - run: make build
+      - run: docker compose --env-file .env -f deploy/compose.images.yaml up -d --wait
+      - run: make integration
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push tested native candidates
+        run: |
+          for component in api worker; do
+            docker tag "loop-sandbox-$component:local" "$IMAGE_PREFIX-$component:$CANDIDATE"
+            docker push "$IMAGE_PREFIX-$component:$CANDIDATE"
+          done
+      - if: failure()
+        run: docker compose --env-file .env -f deploy/compose.images.yaml logs --tail=100
+      - if: always()
+        run: docker compose --env-file .env -f deploy/compose.images.yaml down
+  publish:
+    needs: [validate, native]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      packages: write
+    env:
+      IMAGE_PREFIX: ghcr.io/jimmydi/loop-sandbox
+      VERSION: ${{ needs.validate.outputs.version }}
+      COMMIT: ${{ needs.validate.outputs.sha }}
+    steps:
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish both native architectures
+        run: |
+          for component in api worker; do
+            docker buildx imagetools create \
+              --tag "$IMAGE_PREFIX-$component:$VERSION" \
+              "$IMAGE_PREFIX-$component:sha-$COMMIT-amd64" \
+              "$IMAGE_PREFIX-$component:sha-$COMMIT-arm64"
+            docker buildx imagetools inspect "$IMAGE_PREFIX-$component:$VERSION"
+          done

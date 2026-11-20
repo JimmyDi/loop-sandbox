@@ -9,4 +9,7 @@ COPY src/loop_sandbox/server ./src/loop_sandbox/server
 COPY src/loop_sandbox/runtime ./src/loop_sandbox/runtime
 COPY src/loop_sandbox/integrations ./src/loop_sandbox/integrations
 ENV PYTHONPATH=/app/src
+LABEL org.opencontainers.image.source="https://github.com/JimmyDi/loop-sandbox" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.title="Loop Sandbox API"
 CMD ["uvicorn", "loop_sandbox.server.main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1"]

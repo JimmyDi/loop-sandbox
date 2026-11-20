@@ -6,6 +6,10 @@ User-visible changes are recorded here. Unreleased entries are not release claim
 
 ### Added
 
+- Release-triggered GHCR API/worker publication with native Linux AMD64/ARM64
+  integration gates and matching version tags, plus image-only Compose and
+  container-based credential setup. Images require a successful maintainer release.
+
 - Public HTTP sandbox lifecycle, files, commands and headless Chromium, plus an
   optional model tool-calling endpoint.
 - Session-bound Streamable HTTP MCP at /mcp/ with file editing, background commands,

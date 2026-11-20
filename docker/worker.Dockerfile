@@ -12,5 +12,8 @@ COPY src/loop_sandbox/__init__.py ./src/loop_sandbox/__init__.py
 COPY src/loop_sandbox/contracts ./src/loop_sandbox/contracts
 COPY src/loop_sandbox/worker ./src/loop_sandbox/worker
 ENV PYTHONPATH=/app/src HOME=/tmp CHROMIUM_EXECUTABLE=/usr/bin/chromium
+LABEL org.opencontainers.image.source="https://github.com/JimmyDi/loop-sandbox" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.title="Loop Sandbox worker"
 USER worker
 CMD ["uvicorn", "loop_sandbox.worker.app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

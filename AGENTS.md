@@ -113,6 +113,9 @@ these checks ran. Do not run live tests against unrelated deployments.
   restores the credential; lifecycle deliberately restarts the controller.
 - Renovate needs maintainer activation and never auto-merges. Private vulnerability
   reporting needs GitHub repository configuration. Neither is activated by files.
+- Stable GitHub Releases trigger GHCR publication after native AMD64/ARM64 checks.
+  Image-only Compose and container credential setup are documented in
+  [container releases](docs/releases.md); PR CI uses local images and never pushes.
 
 ## Feature inventory
 
@@ -138,6 +141,26 @@ and real model calls have not been validated. See docs/validation.md for evidenc
 ## Change log
 
 Newest first. Include date, status, behavior, files, verification, remaining gaps.
+
+### 2026-11-20: GHCR release images (complete; publication pending)
+
+- Add release-triggered image publication gated by native AMD64/ARM64 checks and
+  Docker integration. Publish matching API/worker version tags, without latest.
+- Add standalone image-only Compose, container-based credential setup and release
+  instructions. Preserve source development deployment and local private settings.
+- Verification: make check passed 22 unit tests and static/content checks; make
+  package passed archive/metadata/import checks. Both Compose files parsed and
+  actionlint passed both workflows. Container-only init/re-init/rotation passed
+  on ARM64, preserving identity and private file permissions. API rebuilt using
+  the documented public mirror/cache after slow default dependency downloads.
+  Worker rebuild was stopped during slow package downloads; its full build is
+  delegated to PR CI. No fresh local worker build is claimed.
+- CI now runs full integration through image-only Compose with locally built
+  images. No local lifecycle tests were run against the active user deployment.
+- Both native release checks, registry push/manifest assembly and anonymous pull
+  need the release event; this change does not create a release or publish images.
+- Files: release-images.yml, check.yml, both Dockerfiles and Compose files,
+  docs/releases.md, README.md, CONTRIBUTING.md, CHANGELOG.md and this record.
 
 ### 2026-11-20: Public contributor and release readiness (complete)
 

@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.15-slim
 ARG PIP_INDEX_URL=https://pypi.org/simple
 WORKDIR /app
 COPY pyproject.toml uv.lock ./

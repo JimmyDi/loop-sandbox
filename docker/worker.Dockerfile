@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.15-slim
 ARG PIP_INDEX_URL=https://pypi.org/simple
 ARG APT_MIRROR=https://deb.debian.org
 RUN sed -i "s|http://deb.debian.org|$APT_MIRROR|g" /etc/apt/sources.list.d/debian.sources \

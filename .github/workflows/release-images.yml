@@ -22,7 +22,7 @@ jobs:
           fetch-depth: 0
       - uses: astral-sh/setup-uv@v6
         with:
-          version: "0.7.6"
+          version: "0.13.10"
           python-version: "3.12"
       - id: version
         env:
@@ -71,7 +71,7 @@ jobs:
           ref: ${{ needs.validate.outputs.sha }}
       - uses: astral-sh/setup-uv@v6
         with:
-          version: "0.7.6"
+          version: "0.13.10"
           python-version: "3.12"
       - run: make install
       - run: make setup
